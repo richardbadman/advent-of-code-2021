@@ -15,13 +15,13 @@ def main():
     input_file = join(directory, INPUT_FILE_NAME)
     data = _get_measurements(input_file)
     """
-    For part 2, I needed a way to group things into triplets, this is quite
-    easy with comprehensions
+    For part 2, I needed a way to group things into triplets, and then produce
+    it's sum, this is quite easy with comprehensions
 
     Example input:
         [1,2,3,4,5,6]
     Example output:
-        [[1,2,3], [2,3,4], [3,4,5], ...]
+        [[1,2,3], [2,3,4], [3,4,5], ...] -> [6, 9, 13 ...]
     """
     grouped_data = [
         sum(data[n:n+3])

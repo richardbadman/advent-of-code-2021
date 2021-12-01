@@ -7,5 +7,5 @@ Just a small repo containing all of my work for the advent of code for 2021, I'm
 [Day1]
 Given an input of measurements of depth, count the number of times the depth has increased from the previous
 
-Python:	0/2 stars
+Python:	1/2 stars
 Rust:		0/2 stars

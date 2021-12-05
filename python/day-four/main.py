@@ -2,6 +2,7 @@
 
 import os
 
+from functools import reduce
 from os.path import join
 
 NUMBERS = "numbers.txt"
@@ -11,15 +12,12 @@ BOARDS = "boards.txt"
 class Board:
     numbers_called = 0
     last_called_number = 0
-    rows = []
-    columns = []
+    numbers = []
 
-    winning_row = None
-    winning_column = None
+    winning_combo = None
 
     def __init__(self, raw_data):
-        self.rows = _generate_rows(raw_data.copy())
-        self.columns = _generate_columns(raw_data.copy())
+        self.numbers = [Number(value) for value in raw_data]
 
     def __repr__(self):
         return 'Rows: {rows}\nColumns: {columns}'.format(
@@ -28,53 +26,33 @@ class Board:
         )
 
     def process(self, value):
-        if self.winning_row is not None or self.winning_column is not None:
+        if self.winning_combo is not None:
             return
-        self._process_row(value)
-        self._process_column(value)
+        for number in self.numbers:
+            number.process(value)
+
         self.numbers_called += 1
         self.last_called_number = value
+        self._check_for_winning_combo()
 
-    def _process_row(self, value):
-        for row in self.rows:
-            for number in row:
-                number.process(value)
-            if all([number.marked for number in row]):
-                winning_row = row
-                break
-            else:
-                continue
-            break
-
-    def _process_column(self, value):
-        for column in self.columns:
-            for number in column:
-                number.process(value)
-            if all([number.marked for number in column]):
-                self.winning_column = column
-                break
-            else:
-                continue
-            break
+    def _check_for_winning_combo(self):
+        # rows
+        for i in range(0,24,5):
+            if all([number.marked for number in self.numbers[i:i+5]]):
+                self.winning_combo = self.numbers[i:i+5]
+                return
+        # columns
+        for i in range(0,5):
+            if all([number.marked for number in self.numbers[i::5]]):
+                self.winning_combo = self.numbers[i::5]
+                return
 
     def calculate(self):
-        unmarked_values = []
-        if self.winning_row:
-            unmarked_values = [
-                number
-                for row in self.rows
-                if row != self.winning_row
-                for number in row
-                if number.marked == False
-            ]
-        else:
-            unmarked_values = [
-                number
-                for column in self.columns
-                if column != self.winning_column
-                for number in column
-                if number.marked == False
-            ]
+        unmarked_values = [
+            number
+            for number in self.numbers
+            if number.marked == False
+        ]
         total = sum(unmarked_values)
         print("Sum of other values: {total}, Last winning number: {last_number}\n\tProduct: {result}".format(
             total=total,
@@ -128,12 +106,19 @@ def main():
         for board in boards:
             board.process(number)
 
-    winning_board = sorted(boards, key=lambda x: x.numbers_called)[0]
+    sorted_boards = sorted(boards, key=lambda x: x.numbers_called)
+    winning_board = sorted_boards[0]
+    loosing_board = sorted_boards[-1]
     print("Number of turns: {count}, Winning row/column: {win}".format(
         count=winning_board.numbers_called,
         win=winning_board.winning_row or winning_board.winning_column
     ))
     winning_board.calculate()
+    print("Number of turns: {count}, Winning row/column: {win}".format(
+        count=loosing_board.numbers_called,
+        win=loosing_board.winning_row or loosing_board.winning_column
+    ))
+    loosing_board.calculate()
 
 
 def _get_numbers(file):
@@ -148,8 +133,8 @@ def _get_boards(file):
     boards = []
 
     while len(data) > 0:
-        subset = data[:6]
-        boards.append(Board(subset))
+        raw_data = reduce(lambda x,y: x+y, [x.split() for x in data[:6]])
+        boards.append(Board(raw_data))
         del data[:6]
     return boards
 

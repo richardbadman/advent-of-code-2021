@@ -13,5 +13,8 @@ Given an input of directions, calculate the product of your depth and horizontal
 [Day 3]
 Given an input of binary values, calculate the product of your gamma and epsilon
 
-Python:	7/8 stars
+[Day 4]
+Bingo
+
+Python:	8/10 stars
 Rust:		0/2 stars
